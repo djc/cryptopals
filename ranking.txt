@@ -1,0 +1,7 @@
+* level 0 (4362 players)
+* level 1 (335 players)
+* level 2 (123 players)
+* level 3 (40 players)
+* level 4 (21 players)
+* level 5 (23 players)
+* level 6 (32 players)
