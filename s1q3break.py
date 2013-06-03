@@ -5,7 +5,8 @@ FREQ = {c: i for (i, c) in enumerate('etaoinshrdlcumwfgypbvkjxqz')}
 
 def score(chars):
 	
-	res = sum(1 for c in chars if c in string.printable)
+	res = sum(-5 for c in chars if c not in string.printable)
+	res += sum(3 for c in chars if c in string.letters)
 	letters = (c.lower() for c in chars if c in string.letters)
 	freq = collections.Counter(letters)
 	nums = sorted(((f, c) for (c, f) in freq.iteritems()), reverse=True)
