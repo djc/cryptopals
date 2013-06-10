@@ -9,7 +9,7 @@ def decrypt(cipher, key):
 
 if __name__ == '__main__':
 	
-	with open('s1q7-cipher.txt') as f:
+	with open('q7-cipher.txt') as f:
 		cipher = base64.b64decode(f.read())
 	
 	print decrypt(cipher, KEY)

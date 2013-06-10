@@ -1,6 +1,6 @@
-import base64, s1q3break, itertools
+import base64, q3break, itertools
 
-CIPHER_FILE = 's1q6-cipher.txt'
+CIPHER_FILE = 'q6-cipher.txt'
 
 def hamming(x, y):
 	
@@ -48,7 +48,7 @@ def attack(cipher):
 	size = findsize(cipher)
 	res = []
 	for buf in transpose(cipher, size):
-		res.append(s1q3break.attack(buf))
+		res.append(q3break.attack(buf))
 	
 	key = ''.join(chr(key) for (score, key, plain) in res)
 	return key, decrypt(cipher, key)

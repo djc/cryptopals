@@ -19,7 +19,7 @@ def find(ciphers):
 if __name__ == '__main__':
 	
 	ciphers = []
-	with open('s1q8-ciphers.txt') as f:
+	with open('q8-ciphers.txt') as f:
 		for ln in f:
 			ciphers.append(base64.b16decode(ln.strip(), True))
 	
