@@ -9,10 +9,19 @@ pub fn score(bytes: &[u8]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use data_encoding::HEXLOWER;
+    use data_encoding::{BASE64, HEXLOWER};
 
     #[test]
-    fn challenge_1_2() {
+    fn s01c01() {
+        let input = b"49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+        let output = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+        let bytes = HEXLOWER.decode(input).unwrap();
+        let b64 = BASE64.encode(&bytes);
+        assert_eq!(b64, output);
+    }
+
+    #[test]
+    fn s01c02() {
         let a = HEXLOWER
             .decode(b"1c0111001f010100061a024b53535009181c")
             .unwrap();
