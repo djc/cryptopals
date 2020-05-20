@@ -7,9 +7,9 @@ fn main() {
     let mut best = (0, bytes.clone());
     for i in 0u8..=255 {
         let candidate = bytes.iter().map(|v| v ^ i).collect::<Vec<_>>();
-        let count = candidate.iter().filter(|v| (*v).is_ascii_alphabetic()).count();
-        if count > best.0 {
-            best = (count, candidate);
+        let score = set_1::score(&candidate);
+        if score > best.0 {
+            best = (score, candidate);
         }
     }
     println!("{}", str::from_utf8(&best.1).unwrap());

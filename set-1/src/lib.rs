@@ -3,6 +3,10 @@ pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter().zip(b).map(|(a, b)| a ^ b).collect()
 }
 
+pub fn score(bytes: &[u8]) -> usize {
+    bytes.iter().filter(|v| (*v).is_ascii_alphabetic()).count()
+}
+
 #[cfg(test)]
 mod tests {
     use data_encoding::HEXLOWER;
