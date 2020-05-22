@@ -5,16 +5,17 @@ pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter().zip(b).map(|(a, b)| a ^ b).collect()
 }
 
-pub fn find_key(input: &[u8]) -> (isize, Vec<u8>) {
-    let mut best = (0, Vec::from(input));
+pub fn find_key(input: &[u8]) -> (u8, isize, Vec<u8>) {
+    let mut best = (0, 0, Vec::from(input));
     let mut test = Vec::from(input);
     for i in 0u8..=255 {
         test.clear();
         test.extend(input.iter().map(|v| v ^ i));
         let score = score(&test);
-        if score > best.0 {
-            best.0 = score;
-            mem::swap(&mut test, &mut best.1);
+        if score > best.1 {
+            best.0 = i;
+            best.1 = score;
+            mem::swap(&mut test, &mut best.2);
         }
     }
     best
@@ -42,6 +43,48 @@ pub fn xor_encrypt(key: &[u8], plain: &mut [u8]) {
         .zip(key.iter().cycle())
         .for_each(|(c, k)| *c ^= k);
 }
+
+pub fn find_key_size(bytes: &[u8]) -> usize {
+    let mut best = (f64::MAX, 0);
+    let mut blocks = Vec::with_capacity(TEST_BLOCKS);
+    for key_size in 2..40 {
+        blocks.clear();
+        for i in 0..TEST_BLOCKS {
+            blocks.push(&bytes[i * key_size..(i + 1) * key_size]);
+        }
+
+        let mut diffs = 0;
+        for outer in 0..(TEST_BLOCKS - 1) {
+            for inner in (outer + 1)..TEST_BLOCKS {
+                diffs += distance(blocks[outer], blocks[inner]);
+            }
+        }
+
+        // 6 is the number of combinations for selecting 2 different blocks out of 4
+        let normalized = (diffs as f64) / ((key_size * 6) as f64);
+        if normalized < best.0 {
+            best = (normalized, key_size);
+        }
+    }
+
+    best.1
+}
+
+pub fn distance(a: &[u8], b: &[u8]) -> usize {
+    assert_eq!(a.len(), b.len());
+    let mut res = 0;
+    for (&x, &y) in a.iter().zip(b) {
+        let combined = x ^ y;
+        for i in 0..8 {
+            if (combined >> i) & 1 > 0 {
+                res += 1;
+            }
+        }
+    }
+    res
+}
+
+const TEST_BLOCKS: usize = 4;
 
 #[cfg(test)]
 mod tests {
@@ -80,5 +123,10 @@ mod tests {
             "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
              a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
         );
+    }
+
+    #[test]
+    fn distance() {
+        assert_eq!(super::distance(b"this is a test", b"wokka wokka!!!"), 37);
     }
 }
