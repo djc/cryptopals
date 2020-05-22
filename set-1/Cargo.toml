@@ -5,5 +5,7 @@ authors = ["Dirkjan Ochtman <dirkjan.ochtman@ing.com>"]
 edition = "2018"
 
 [dependencies]
+aes = "0.3.2"
 anyhow = "1"
+block-modes = ""
 data-encoding = "2.2"
