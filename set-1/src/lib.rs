@@ -5,7 +5,28 @@ pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter().zip(b).map(|(a, b)| a ^ b).collect()
 }
 
-pub fn find_key(input: &[u8]) -> (u8, isize, Vec<u8>) {
+pub fn find_repeated_key(bytes: &[u8], key_size: usize) -> Vec<u8> {
+    let extra = bytes.len() % key_size;
+    let mut transposed = vec![0; bytes.len()];
+    let block_len = bytes.len() / key_size;
+    for (i, &b) in bytes.iter().enumerate() {
+        let block = i % key_size;
+        let pos = i / key_size;
+        let dst = block * block_len + pos + 1 * block.min(extra);
+        assert_eq!(transposed[dst], 0);
+        transposed[dst] = b;
+    }
+
+    (0..key_size)
+        .map(|i| {
+            let start = i * block_len + (1 * i.min(extra));
+            let end = start + block_len + if i < extra { 1 } else { 0 };
+            find_byte_key(&transposed[start..end]).0
+        })
+        .collect::<Vec<_>>()
+}
+
+pub fn find_byte_key(input: &[u8]) -> (u8, isize, Vec<u8>) {
     let mut best = (0, 0, Vec::from(input));
     let mut test = Vec::from(input);
     for i in 0u8..=255 {
