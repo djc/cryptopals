@@ -9,7 +9,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut best = (0, 0, Vec::new());
     for ln in input.lines() {
         let candidate = HEXLOWER.decode(ln.trim().as_bytes()).unwrap();
-        let best_option = set_1::find_key(&candidate);
+        let best_option = set_1::find_byte_key(&candidate);
         if best_option.1 > best.1 {
             best = best_option;
         }

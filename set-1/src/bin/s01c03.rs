@@ -4,7 +4,7 @@ use data_encoding::HEXLOWER;
 
 fn main() {
     let bytes = HEXLOWER.decode(INPUT.as_bytes()).unwrap();
-    let best = set_1::find_key(&bytes);
+    let best = set_1::find_byte_key(&bytes);
     println!("{}", str::from_utf8(&best.2).unwrap());
 }
 
