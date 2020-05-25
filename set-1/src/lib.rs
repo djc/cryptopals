@@ -44,19 +44,101 @@ pub fn find_byte_key(input: &[u8]) -> (u8, isize, Vec<u8>) {
 
 pub fn score(bytes: &[u8]) -> isize {
     let mut score = 0;
+    let mut frequency = [0usize; 26];
+
     for &b in bytes {
-        if b.is_ascii_alphabetic() {
+        if let Some(i) = index(b) {
+            frequency[i] += 1;
+        }
+
+        if b.is_ascii_lowercase() {
+            score += 6;
+        } else if b.is_ascii_alphabetic() {
             score += 5;
         } else if b.is_ascii_punctuation() {
-            score += 0;
+            score += 1;
         } else if b.is_ascii_whitespace() {
-            score += 2;
+            score += 1;
         } else if !b.is_ascii_graphic() {
-            score -= 3;
+            score -= 10;
+        } else if b > 128 {
+            score -= 10;
         }
     }
+
+    let freqs = frequency.iter().enumerate().filter_map(|(i, freq)| {
+        if *freq > 0 {
+            Some((-(*freq as i32), i))
+        } else {
+            None
+        }
+    });
+
+    let mut amount = 0;
+    let mut ranked = [None; 26];
+    for (freq, c) in freqs {
+        ranked[amount] = Some((freq, c));
+        amount += 1;
+    }
+
+    for v1 in &ranked[..amount] {
+        for v2 in &ranked[..amount] {
+            match (v1.unwrap(), v2.unwrap()) {
+                ((_, c1), (_, c2)) if c1 >= c2 => {},
+                ((f1, c1), (f2, c2)) => {
+                    let (e1, e2) = (LETTER_RANKS[c1], LETTER_RANKS[c2]);
+                    if e1.cmp(&e2) != f1.cmp(&f2) {
+                        score -= 2;
+                    } else {
+                        score += 1;
+                    }
+
+                }
+            }
+        }
+    }
+
     score
 }
+
+fn index(b: u8) -> Option<usize> {
+    if b.is_ascii_lowercase() {
+        Some((b - 97) as usize)
+    } else if b.is_ascii_uppercase() {
+        Some((b - 65) as usize)
+    } else {
+        None
+    }
+}
+
+const LETTER_RANKS: [u8; 26] = [
+    4,  // a
+    18, // b
+    17, // c
+    9,  // d
+    0,  // e
+    15, // f
+    16, // g
+    3,  // h
+    6,  // i
+    22, // j
+    20, // k
+    10, // l
+    13, // m
+    7,  // n
+    1,  // o
+    19, // p
+    23, // q
+    8,  // r
+    5,  // s
+    2,  // t
+    11, // u
+    21, // v
+    14, // w
+    24, // x
+    12, // y
+    25, // z
+];
 
 pub fn xor_encrypt(key: &[u8], plain: &mut [u8]) {
     plain
@@ -149,5 +231,10 @@ mod tests {
     #[test]
     fn distance() {
         assert_eq!(super::distance(b"this is a test", b"wokka wokka!!!"), 37);
+    }
+
+    #[test]
+    fn frequency() {
+        assert_eq!(super::score(b"foo"), 18);
     }
 }
