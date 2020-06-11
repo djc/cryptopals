@@ -94,7 +94,7 @@ pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter().zip(b).map(|(a, b)| a ^ b).collect()
 }
 
-pub fn xor_encrypt(key: &[u8], plain: &mut [u8]) {
+pub fn repeated_xor(key: &[u8], plain: &mut [u8]) {
     plain
         .iter_mut()
         .zip(key.iter().cycle())
@@ -131,7 +131,7 @@ mod tests {
         let mut input = Vec::from(
             &b"Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"[..],
         );
-        super::xor_encrypt(b"ICE", &mut input);
+        super::repeated_xor(b"ICE", &mut input);
         let result = HEXLOWER.encode(&input);
         assert_eq!(
             result,

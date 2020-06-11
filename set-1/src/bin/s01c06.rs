@@ -10,7 +10,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     let key_size = set_1::find_key_size(&bytes);
     let key = set_1::find_repeated_key(&bytes, key_size);
-    set_1::xor_encrypt(&key, &mut bytes);
+    set_1::repeated_xor(&key, &mut bytes);
     println!("{}", str::from_utf8(&bytes)?);
 
     Ok(())
