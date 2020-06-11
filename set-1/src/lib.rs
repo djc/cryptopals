@@ -139,9 +139,4 @@ mod tests {
              a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
         );
     }
-
-    #[test]
-    fn distance() {
-        assert_eq!(super::distance(b"this is a test", b"wokka wokka!!!"), 37);
-    }
 }

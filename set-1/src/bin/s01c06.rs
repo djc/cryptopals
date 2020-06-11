@@ -15,3 +15,47 @@ fn main() -> Result<(), anyhow::Error> {
 
     Ok(())
 }
+
+pub fn find_key_size(bytes: &[u8]) -> usize {
+    let mut best = (f64::MAX, 0);
+    let mut blocks = Vec::with_capacity(TEST_BLOCKS);
+    for key_size in 2..40 {
+        blocks.clear();
+        for i in 0..TEST_BLOCKS {
+            blocks.push(&bytes[i * key_size..(i + 1) * key_size]);
+        }
+
+        let mut diffs = 0;
+        for outer in 0..(TEST_BLOCKS - 1) {
+            for inner in (outer + 1)..TEST_BLOCKS {
+                diffs += distance(blocks[outer], blocks[inner]);
+            }
+        }
+
+        // 6 is the number of combinations for selecting 2 different blocks out of 4
+        let normalized = (diffs as f64) / ((key_size * 6) as f64);
+        if normalized < best.0 {
+            best = (normalized, key_size);
+        }
+    }
+
+    best.1
+}
+
+const TEST_BLOCKS: usize = 4;
+
+pub fn distance(a: &[u8], b: &[u8]) -> usize {
+    assert_eq!(a.len(), b.len());
+    a.iter()
+        .zip(b)
+        .map(|(&x, &y)| (x ^ y).count_ones())
+        .sum::<u32>() as usize
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn distance() {
+        assert_eq!(super::distance(b"this is a test", b"wokka wokka!!!"), 37);
+    }
+}
