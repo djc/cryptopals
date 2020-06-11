@@ -1,8 +1,39 @@
 use std::mem;
 
-pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
+pub fn find_key_size(bytes: &[u8]) -> usize {
+    let mut best = (f64::MAX, 0);
+    let mut blocks = Vec::with_capacity(TEST_BLOCKS);
+    for key_size in 2..40 {
+        blocks.clear();
+        for i in 0..TEST_BLOCKS {
+            blocks.push(&bytes[i * key_size..(i + 1) * key_size]);
+        }
+
+        let mut diffs = 0;
+        for outer in 0..(TEST_BLOCKS - 1) {
+            for inner in (outer + 1)..TEST_BLOCKS {
+                diffs += distance(blocks[outer], blocks[inner]);
+            }
+        }
+
+        // 6 is the number of combinations for selecting 2 different blocks out of 4
+        let normalized = (diffs as f64) / ((key_size * 6) as f64);
+        if normalized < best.0 {
+            best = (normalized, key_size);
+        }
+    }
+
+    best.1
+}
+
+const TEST_BLOCKS: usize = 4;
+
+pub fn distance(a: &[u8], b: &[u8]) -> usize {
     assert_eq!(a.len(), b.len());
-    a.iter().zip(b).map(|(a, b)| a ^ b).collect()
+    a.iter()
+        .zip(b)
+        .map(|(&x, &y)| (x ^ y).count_ones())
+        .sum::<u32>() as usize
 }
 
 pub fn find_repeated_key(bytes: &[u8], key_size: usize) -> Vec<u8> {
@@ -58,54 +89,17 @@ pub fn score(bytes: &[u8]) -> isize {
     score
 }
 
+pub fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
+    assert_eq!(a.len(), b.len());
+    a.iter().zip(b).map(|(a, b)| a ^ b).collect()
+}
+
 pub fn xor_encrypt(key: &[u8], plain: &mut [u8]) {
     plain
         .iter_mut()
         .zip(key.iter().cycle())
         .for_each(|(c, k)| *c ^= k);
 }
-
-pub fn find_key_size(bytes: &[u8]) -> usize {
-    let mut best = (f64::MAX, 0);
-    let mut blocks = Vec::with_capacity(TEST_BLOCKS);
-    for key_size in 2..40 {
-        blocks.clear();
-        for i in 0..TEST_BLOCKS {
-            blocks.push(&bytes[i * key_size..(i + 1) * key_size]);
-        }
-
-        let mut diffs = 0;
-        for outer in 0..(TEST_BLOCKS - 1) {
-            for inner in (outer + 1)..TEST_BLOCKS {
-                diffs += distance(blocks[outer], blocks[inner]);
-            }
-        }
-
-        // 6 is the number of combinations for selecting 2 different blocks out of 4
-        let normalized = (diffs as f64) / ((key_size * 6) as f64);
-        if normalized < best.0 {
-            best = (normalized, key_size);
-        }
-    }
-
-    best.1
-}
-
-pub fn distance(a: &[u8], b: &[u8]) -> usize {
-    assert_eq!(a.len(), b.len());
-    let mut res = 0;
-    for (&x, &y) in a.iter().zip(b) {
-        let combined = x ^ y;
-        for i in 0..8 {
-            if (combined >> i) & 1 > 0 {
-                res += 1;
-            }
-        }
-    }
-    res
-}
-
-const TEST_BLOCKS: usize = 4;
 
 #[cfg(test)]
 mod tests {
